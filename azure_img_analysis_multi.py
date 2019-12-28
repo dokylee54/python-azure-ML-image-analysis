@@ -1,14 +1,21 @@
+# If you are using a Jupyter notebook, uncomment the following line.
+#%matplotlib inline
 import json
 import glob
 import requests
-# If you are using a Jupyter notebook, uncomment the following line.
-#%matplotlib inline
+import pprint
 import matplotlib.pyplot as plt
-from PIL import Image
-from io import BytesIO
+
+'''
+
+Reference:
+
+https://westus.dev.cognitive.microsoft.com/docs/services/5adf991815e1060e6355ad44/operations/56f91f2e778daf14a499e1fa
+
+'''
 
 # Replace <Subscription Key> with your valid subscription key.
-subscription_key = "21cb274b0d724d51a80bd0163173f1f3"
+subscription_key = "<Subscription Key>"
 assert subscription_key
 
 # You must use the same region in your REST call as you used to get your
@@ -22,35 +29,45 @@ vision_base_url = "https://westus.api.cognitive.microsoft.com/vision/v2.0/"
 
 analyze_url = vision_base_url + "analyze"
 
+headers    = {'Ocp-Apim-Subscription-Key': subscription_key,
+              'Content-Type': 'application/octet-stream'}
+
+params     = {'visualFeatures': 'Categories,Description,Color',
+                'details': 'Landmarks'}
+
+
+
 # open result file
-f = open("C:\\Users\\dokyl\\바탕 화면\\test\\instalooter result\\제천\\cog_results.json", 'w')
+f = open("test.json", 'w')
+
+
 
 # Set image_path to the local path of an image that you want to analyze.
-images = glob.glob("C:\\Users\\dokyl\\바탕 화면\\test\\instalooter result\\제천\\*.*")
+images = glob.glob("test_folder/test_img/*.*")
 
-for image_path in images:
 
+#
+for img in images:
     # Read the image into a byte array
-    image_data = open(image_path, "rb").read()
-    headers    = {'Ocp-Apim-Subscription-Key': subscription_key,
-                  'Content-Type': 'application/octet-stream'}
-    params     = {'visualFeatures': 'Categories,Description,Color'}
+    print(img)
+    image_data = open(img, "rb").read()    
+
     response = requests.post(
-       analyze_url, headers=headers, params=params, data=image_data)
+    analyze_url, headers=headers, params=params, data=image_data
+    )
+
     response.raise_for_status()
 
     # The 'analysis' object contains various fields that describe the image. The most
     # relevant caption for the image is obtained from the 'description' property.
     analysis = response.json()
-    json.dump(analysis, f, indent=4)
-    print(analysis)
-    image_caption = analysis["description"]["captions"][0]["text"].capitalize()
 
-    # Display the image and overlay it with the caption.
-    image = Image.open(BytesIO(image_data))
-    plt.imshow(image)
-    plt.show()
-    plt.axis("off")
-    _ = plt.title(image_caption, size="x-large", y=-0.1)
+    # save json result
+    json.dump(analysis, f, indent=4)
+
+    # pretty print json
+    print(json.dumps(analysis, indent=4))
+#
+
 
 f.close()
