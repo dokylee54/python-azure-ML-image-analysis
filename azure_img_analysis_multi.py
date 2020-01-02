@@ -121,7 +121,7 @@ if __name__ == "__main__":
             # Read the image into a byte array
             print(img)
 
-            # parse filename
+            # parse a filename
             f_filename, f_shortcode, f_category, _ = file_util.parse_filename(img)            
 
             # read the image
